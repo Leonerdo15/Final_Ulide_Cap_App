@@ -22,6 +22,9 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class GalleryFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnPolylineClickListener, GoogleMap.OnPolygonClickListener {
 
@@ -68,17 +71,30 @@ public class GalleryFragment extends Fragment implements OnMapReadyCallback, Goo
         LatLng mountainView = new LatLng(38.746784346527086, -9.196530753989746);
         LatLng lisbon  = new LatLng(24.368249921401237, -23.942334118087796);
 
+        // ArrayList of points in route
+        List<LatLng> route = new ArrayList<>();
+        route.add(new LatLng(38.706917167588024, -9.147624179719928));
+        route.add(new LatLng(38.70224140668347, -9.17271152745779));
+        route.add(new LatLng(38.695425754834616, -9.222878073671835));
+        route.add(new LatLng(38.6998107493238, -9.249783816170048));
+        route.add(new LatLng(38.73201688686085, -9.244173545646076));
+        route.add(new LatLng(38.751584539277744, -9.259834736791248));
+        route.add(new LatLng(38.73596330351778, -9.195963938162304));
+
+
+        // Array list to Array
+        LatLng[] routeArray = route.toArray(new LatLng[route.size()]);
+
+
+
+
         // Add polylines to the map.
         // Polylines are useful to show a route or some other connection between points.
         Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
                 .clickable(true)
-                .add(
-                        new LatLng(38.706917167588024, -9.147624179719928),
-                        new LatLng(38.70224140668347, -9.17271152745779),
-                        new LatLng(38.695425754834616, -9.222878073671835),
-                        new LatLng(38.6998107493238, -9.249783816170048),
-                        new LatLng(38.73201688686085, -9.244173545646076),
-                        new LatLng(38.751584539277744, -9.259834736791248)));
+                .add(routeArray));
+
+
 
         // Set listeners for click events.
         googleMap.setOnPolylineClickListener(this);
