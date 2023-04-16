@@ -62,7 +62,7 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
     private long pauseOffset;
     private boolean running;
 
-    Button start, pause, reset;
+    Button start, pause;
 
 
     protected GoogleMap mMap;
@@ -78,6 +78,8 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
     LocationListener locationListener;
 
     private boolean getLocation = true;
+
+    TextView speedTextView;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -107,7 +109,7 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
 
         start = root.findViewById(R.id.start);
         pause = root.findViewById(R.id.pause);
-        reset = root.findViewById(R.id.reset);
+        speedTextView = root.findViewById(R.id.speedTextView);
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapView2);
@@ -119,9 +121,7 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
         chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
-//                if ((SystemClock.elapsedRealtime() - chronometer.getBase()) >= 10000) {
-//                    chronometer.setBase(SystemClock.elapsedRealtime());
-//                }
+
             }
         });
 
@@ -139,20 +139,6 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
             }
         });
 
-        reset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetChronometer(v);
-            }
-        });
-
-        /*new Timer().scheduleAtFixedRate(new TimerTask(){
-            @Override
-            public void run(){
-
-            }
-        },0,1000);
-*/
         return root;
     }
 
@@ -203,7 +189,6 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
             running = true;
         }
     }
-
     public void pauseChronometer(View view) {
         if (running) {
             chronometer.stop();
@@ -212,10 +197,6 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
         }
     }
 
-    public void resetChronometer(View view) {
-        chronometer.stop();
-        pauseOffset = 0;
-    }
 
     @Override
     public void onPolygonClick(@NonNull Polygon polygon) {
@@ -245,7 +226,7 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
         handler.postDelayed(new Runnable(){
             public void run(){
 
-                locationManager = (LocationManager) Objects.requireNonNull(getActivity()).getSystemService(Context.LOCATION_SERVICE);
+                locationManager = (LocationManager) Objects.requireNonNull(getContext()).getSystemService(Context.LOCATION_SERVICE);
                 locationListener = new LocationListener() {
                     @Override
                     public void onLocationChanged(Location location) {
@@ -314,6 +295,22 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
                         Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                                 .clickable(true)
                                 .add(routeArray));
+
+                        LocationListener locationListener = new LocationListener() {
+                            public void onLocationChanged(Location location) {
+                                float speed = location.getSpeed();
+                                float speedKmH = speed * 3.6f;
+                                // make the speedKmH with two decimal places
+                                speedKmH = Math.round(speedKmH * 100.0f) / 100.0f;
+                                speedTextView.setText("Speed: " + speedKmH + "Km/h");
+//                                Toast.makeText(getActivity(), "Speed: "+ speedKmH + "Km/h", Toast.LENGTH_SHORT).show();
+                            }
+                            public void onStatusChanged(String provider, int status, Bundle extras) {}
+                            public void onProviderEnabled(String provider) {}
+                            public void onProviderDisabled(String provider) {}
+                        };
+
+                        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 1000, 0, locationListener);
 
 
                         // move camera to the last location in the route

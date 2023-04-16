@@ -8,15 +8,27 @@
     android:orientation="vertical"
     tools:context="com.example.finalulidecap.ui.Main.ui.slideshow.SlideshowFragment">
 
+
+
     <Chronometer
         android:id="@+id/chronometer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="30sp" />
 
+    <TextView
+        android:id="@+id/speedTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="20sp" />
+
+
     <GridLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:rowCount="2">
 
         <Button
             android:id="@+id/start"
@@ -30,11 +42,6 @@
             android:layout_height="wrap_content"
             android:text="Pause" />
 
-        <Button
-            android:id="@+id/reset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Reset" />
     </GridLayout>
 
     <fragment
@@ -43,6 +50,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         map:cameraZoom="20"/>
+
+    <!--<com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />-->
 
 
 </LinearLayout>
