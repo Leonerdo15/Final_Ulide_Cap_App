@@ -16,5 +16,9 @@
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_slideshow" />
+        <item
+            android:id="@+id/nav_esp32"
+            android:icon="@android:drawable/stat_sys_data_bluetooth"
+            android:title="@string/menu_esp32" />
     </group>
 </menu>

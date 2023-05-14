@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
@@ -28,6 +29,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.util.Objects;
 
@@ -68,7 +70,9 @@ public class MainActivity extends AppCompatActivity {
 
         Log.e("IP", "" + ip);
 
-        criaIndex(filesDir, ip);
+        String filename = "index.html";
+
+        criaIndex(filename, ip);
 
         //TinyWebServer.startServer("localhost",8080, dir);
         TinyWebServer.startServer(ip,8080, dir);
@@ -78,12 +82,24 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow, R.id.nav_esp32)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main2);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+//        Handler mHandler= new Handler();
+//        final Runnable runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                // do your stuff here, called every second
+//                Log.d("POSTED", "POSTED" + TinyWebServer.DATA_POSTED);
+//                mHandler.postDelayed(this, 5000);
+//            }
+//        };
+//
+//        mHandler.post(runnable);
     }
 
     @Override
@@ -93,25 +109,14 @@ public class MainActivity extends AppCompatActivity {
         TinyWebServer.stopServer();
     }
 
-    public void criaIndex(File filesDir, String ip) {
+    public void criaIndex(String filename, String ip) {
+        FileOutputStream outputStream;
         try {
-            File f = new File(filesDir + "/index.html");
-
-            if (f.exists()) {
-                Log.d(TAG, "Ficheiro index.html existe");
-                f.delete();
-                Log.d(TAG, "Vou abrir ficheiro para escrita");
-                FileWriter out = new FileWriter(f, true);
-                Log.d(TAG, "Abri ficheiro para escrita");
-                out.append("<html><head><meta charset='utf-8'></head><body><h2>Android</h2><p>O meu IP é: " + ip + "</p></body></html>");
-                Log.d(TAG, "Escrevi no ficheiro");
-                out.flush();
-                out.close();
-            }
-
-        } catch(Exception e){
+            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(ip.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "Erro a criar o ficheiro: " + e.toString());
         }
     }
 

@@ -159,6 +159,8 @@ public class TinyWebServer extends Thread {
     public static int SERVER_PORT=9000;
     public static boolean isStart=true;
     public static String INDEX_FILE_NAME="index.html";
+
+    public static String DATA_POSTED = "{\"po_id\":1,\"po_location\":\"010100000000000000000028400000000000000040\",\"po_altitude\":111,\"po_velocity\":15,\"po_date\":\"2023-04-03T22:37:39.926Z\",\"po_TempOutside\":22,\"po_TempInside\":25.5,\"po_gx\":1,\"po_gy\":1,\"po_gz\":1,\"po_ax\":1,\"po_ay\":1,\"po_az\":1,\"po_DistUltraSound\":1025,\"po_ro_id\":1,\"po_lat\":12,\"po_long\":2}\n";
     
 
     public TinyWebServer(final String ip, final int port) throws IOException {
@@ -257,9 +259,13 @@ public class TinyWebServer extends Thread {
                     if (!REQUEST_TYPE.equals("")) {
                         String postData = "";
                         if (REQUEST_TYPE.equalsIgnoreCase("POST") && !contentLen.equals("0")) {
+                            Log.e("Header", "header -> " + header[header.length - 1]);
                             postData = header[header.length - 1];
+                            DATA_POSTED = postData;
                             if (postData.length() > 0 && contentLen.length() > 0) {
                                 int len = Integer.valueOf(contentLen);
+                                Log.d(TAG, "Post data -> " + contentLen + " ->" + postData);
+                                Log.d(TAG, "Length -> " + len);
                                 postData = postData.substring(0, len);
                                // System.out.println("Post data -> " + contentLen + " ->" + postData);
                             }
@@ -298,6 +304,7 @@ public class TinyWebServer extends Thread {
             default:
 
                 System.out.println("url location -> " + location);
+                Log.e("url location -> ", location);
                 URL geturl = getDecodedUrl("http://localhost" + location);
                 String[] dirPath = geturl.getPath().split("/");
                 String fullFilePath=geturl.getPath();
@@ -308,6 +315,7 @@ public class TinyWebServer extends Thread {
                         if (qparms==null){ qparms=new HashMap<String,String>();}
                         qparms.put("_POST", postData);
                     }
+                    Log.e("PostData", "processLocation: "+postData);
                     //System.out.println("File name " + fileName);
                     //System.out.println("url parms " + qparms);
                     CONTENT_TYPE = getContentType(fileName);

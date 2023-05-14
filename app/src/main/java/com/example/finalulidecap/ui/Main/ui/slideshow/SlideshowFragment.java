@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.finalulidecap.R;
 import com.example.finalulidecap.databinding.FragmentHomeBinding;
 import com.example.finalulidecap.databinding.FragmentSlideshowBinding;
+import com.example.finalulidecap.server.TinyWebServer;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -46,6 +47,10 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,40 +153,6 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
         binding = null;
     }
 
-    public void getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(Objects.requireNonNull(getActivity()), location -> {
-            if (location != null) {
-                LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                Log.e("Current Location", currentLocation.toString());
-                Toast.makeText(getActivity(), currentLocation.toString(), Toast.LENGTH_SHORT).show();
-                route.add(currentLocation);
-                LatLng[] routeArray = route.toArray(new LatLng[route.size()]);
-                Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
-                        .clickable(true)
-                        .add(routeArray));
-
-
-
-                // Set listeners for click events.
-                mMap.setOnPolylineClickListener(this);
-                mMap.setOnPolygonClickListener(this);
-                // move camera to the last location in the route
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(route.size() - 1), 20));
-
-            }
-        });
-    }
-
     public void startChronometer(View view) {
         if (!running) {
             chronometer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
@@ -225,8 +196,9 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
 
         handler.postDelayed(new Runnable(){
             public void run(){
-
-                locationManager = (LocationManager) Objects.requireNonNull(getContext()).getSystemService(Context.LOCATION_SERVICE);
+                if (getActivity()!=null){
+                    locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+                }
                 locationListener = new LocationListener() {
                     @Override
                     public void onLocationChanged(Location location) {
@@ -234,16 +206,10 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
                             mMap.clear();
                             LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
                             Log.e("Current Location", userLocation.toString());
-                            route.add(userLocation);
-                            LatLng[] routeArray = route.toArray(new LatLng[route.size()]);
-                            Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
-                                    .clickable(true)
-                                    .add(routeArray));
-
 
                             // move camera to the last location in the route
                             if (getLocation){
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(route.size() - 1), 20));
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 20));
                                 getLocation = false;
                             }
 
@@ -269,54 +235,60 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
                 };
 
                 if (Build.VERSION.SDK_INT < 23) {
-                    if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
-                        ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()), new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
+                    if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
                     }
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 20, locationListener);
                 } else {
-                    if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()),Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()), new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
+                    if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getContext()),Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
                     } else {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 20, locationListener);
                         Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        // If the user pressed the button start the chronometer
+                        if (running){
+                            mMap.clear();
+                            LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                            Log.e("Current Location", currentLocation.toString());
+                            route.add(currentLocation);
+                            LatLng[] routeArray = route.toArray(new LatLng[route.size()]);
+                            Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
+                                    .clickable(true)
+                                    .add(routeArray));
 
-                        mMap.clear();
-                        LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                        Log.e("Current Location", currentLocation.toString());
-                        route.add(currentLocation);
-                        LatLng[] routeArray = route.toArray(new LatLng[route.size()]);
-                        Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
-                                .clickable(true)
-                                .add(routeArray));
-
-                        LocationListener locationListener = new LocationListener() {
-                            public void onLocationChanged(Location location) {
-                                float speed = location.getSpeed();
-                                float speedKmH = speed * 3.6f;
-                                // make the speedKmH with two decimal places
-                                speedKmH = Math.round(speedKmH * 100.0f) / 100.0f;
-                                speedTextView.setText("Speed: " + speedKmH + "Km/h");
+                            LocationListener locationListener = new LocationListener() {
+                                public void onLocationChanged(Location location) {
+                                    float speed = location.getSpeed();
+                                    float speedKmH = speed * 3.6f;
+                                    // make the speedKmH with two decimal places
+                                    speedKmH = Math.round(speedKmH * 100.0f) / 100.0f;
+                                    speedTextView.setText("Speed: " + speedKmH + "Km/h");
 //                                Toast.makeText(getActivity(), "Speed: "+ speedKmH + "Km/h", Toast.LENGTH_SHORT).show();
+                                }
+                                public void onStatusChanged(String provider, int status, Bundle extras) {}
+                                public void onProviderEnabled(String provider) {}
+                                public void onProviderDisabled(String provider) {}
+                            };
+
+                            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 0, 20, locationListener);
+
+                            Log.d("POSTED", "POSTED" + TinyWebServer.DATA_POSTED);
+                            if (TinyWebServer.DATA_POSTED != null) {
+                                try {
+                                    JSONObject arr = new JSONObject(TinyWebServer.DATA_POSTED);
+                                    arr.getInt("po_velocity");
+                                    Log.e("Velocity", arr.getInt("po_velocity") + "");
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
-                            public void onStatusChanged(String provider, int status, Bundle extras) {}
-                            public void onProviderEnabled(String provider) {}
-                            public void onProviderDisabled(String provider) {}
-                        };
-
-                        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 1000, 0, locationListener);
 
 
-                        // move camera to the last location in the route
-                        if (getLocation){
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(route.size() - 1), 20));
-                            getLocation = false;
+                            // move camera to the last location in the route
+                            if (getLocation){
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(route.size() - 1), 20));
+                                getLocation = false;
+                            }
                         }
                     }
                 }
