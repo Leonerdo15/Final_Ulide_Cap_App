@@ -71,12 +71,7 @@ public class Esp32Fragment extends Fragment {
             }
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!checkPermission()) {
-                Toast.makeText(getContext(), "Bluetooth permission not granted, wait", Toast.LENGTH_LONG).show();
-                requestPermission();
-            }
-        }
+
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
@@ -160,19 +155,9 @@ public class Esp32Fragment extends Fragment {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.S)
-    private boolean checkPermission() {
-        return ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
-    }
 
-    @RequiresApi(api = Build.VERSION_CODES.S)
-    private void requestPermission() {
-        Toast.makeText(getContext(), "Requesting Bluetooth permission", Toast.LENGTH_LONG).show();
-        ActivityCompat.requestPermissions(
-                Objects.requireNonNull(getActivity()), new String[]{Manifest.permission.BLUETOOTH_CONNECT},
-                1);
-        Toast.makeText(getContext(), "Bluetooth permission requested, aaaaaa", Toast.LENGTH_LONG).show();
-    }
+
+
 
     @Override
     public void onDestroy() {

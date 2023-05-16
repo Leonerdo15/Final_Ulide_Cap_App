@@ -13,12 +13,14 @@ import android.os.Handler;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.Toast;
 
 import com.example.finalulidecap.R;
 import com.example.finalulidecap.databinding.ActivityMainBinding;
 import com.example.finalulidecap.server.TinyWebServer;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -57,6 +59,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Não foram dadas permissões");
         } else {
             Log.d(TAG, "Já há permissões de escrita");
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!checkPermission()) {
+                Toast.makeText(this, "Bluetooth permission not granted, wait", Toast.LENGTH_LONG).show();
+                requestPermission();
+            }
         }
 
         File filesDir = getFilesDir();
@@ -138,11 +147,25 @@ public class MainActivity extends AppCompatActivity {
                 1);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private boolean checkPermission() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private void requestPermission() {
+        Toast.makeText(this, "Requesting Bluetooth permission", Toast.LENGTH_LONG).show();
+        ActivityCompat.requestPermissions(
+                this, new String[]{Manifest.permission.BLUETOOTH_CONNECT},
+                1);
+        Toast.makeText(this, "Bluetooth permission requested, aaaaaa", Toast.LENGTH_LONG).show();
     }
 
     @Override
