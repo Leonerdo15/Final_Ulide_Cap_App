@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.finalulidecap.R;
 import com.example.finalulidecap.databinding.ActivityMainBinding;
+import com.example.finalulidecap.downloaders.JSONObjDownloader;
 import com.example.finalulidecap.server.TinyWebServer;
 import com.google.android.material.navigation.NavigationView;
 
@@ -30,16 +31,23 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+
+    private JSONObject objLogin;
+
+    String url_update_ip;
 
     private static final String TAG = "HTTPDIR";
     @Override
@@ -78,6 +86,20 @@ public class MainActivity extends AppCompatActivity {
         String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
 
         Log.e("IP", "" + ip);
+
+        url_update_ip = "http://ulideparty.ddns.net:8080/api/user/1/ip/" + ip;
+
+        Log.e("URL", "" + url_update_ip);
+
+        JSONObjDownloader task = new JSONObjDownloader();
+
+        try {
+            objLogin = task.execute(url_update_ip).get();
+            Log.e("obj_update_ip", "" + objLogin);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            objLogin = null;
+        }
 
         String filename = "index.html";
 
