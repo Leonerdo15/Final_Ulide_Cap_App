@@ -2,19 +2,17 @@ package com.example.finalulidecap.ui.Main.ui.home;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -24,8 +22,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.finalulidecap.R;
 import com.example.finalulidecap.databinding.FragmentHomeBinding;
+import com.example.finalulidecap.ui.Main.Bluethoot;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
 
@@ -36,19 +34,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.single.PermissionListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 // TODO: Finish this video: https://www.youtube.com/watch?v=q9rQwXA9umQ
 public class HomeFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnPolylineClickListener, GoogleMap.OnPolygonClickListener {
@@ -64,6 +51,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Google
 
     private boolean getLocation = true;
 
+    FloatingActionButton bluetooth;
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -85,12 +73,21 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Google
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        bluetooth = root.findViewById(R.id.bluebutton);
+
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.maps);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+
+        bluetooth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToBluetoothActivity();
+            }
+        });
 
         return root;
     }
@@ -184,6 +181,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Google
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    public void goToBluetoothActivity(){
+        Intent intent = new Intent(getActivity(), Bluethoot.class);
+        startActivity(intent);
     }
 
     @Override
