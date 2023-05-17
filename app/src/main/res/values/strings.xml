@@ -23,4 +23,5 @@
     <string name="menu_esp32">Esp32</string>
 
     <string name="api_path">http://192.168.1.67:8080/api</string>
+    <string name="title_activity_bluethoot">Bluethoot</string>
 </resources>
