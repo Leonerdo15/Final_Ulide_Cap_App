@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.example.finalulidecap.R;
+import com.example.finalulidecap.data.LoginDataSource;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -35,7 +37,7 @@ public class Bluethoot extends AppCompatActivity {
     private boolean mConnected = false;
 
     private EditText mDataEditText;
-    private Button mSendButton;
+    private Button mSendButton, mSendId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +47,23 @@ public class Bluethoot extends AppCompatActivity {
 
         mDataEditText = findViewById(R.id.data_edit_text1);
         mSendButton = findViewById(R.id.send_button1);
+        mSendId = findViewById(R.id.sendId);
 
         mDataEditText.setText("led_on");
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendData();
+                sendData(mDataEditText.getText().toString());
+            }
+        });
+
+        mSendId.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                sendData("id"+String.valueOf(LoginDataSource.ID));
+
             }
         });
 
@@ -70,8 +83,8 @@ public class Bluethoot extends AppCompatActivity {
 
     }
 
-    private void sendData() {
-        String data = mDataEditText.getText().toString();
+    private void sendData(String data) {
+
         if (data.isEmpty()) {
             Toast.makeText(this, "Data is empty", Toast.LENGTH_SHORT).show();
             return;
