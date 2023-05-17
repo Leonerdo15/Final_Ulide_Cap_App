@@ -45,7 +45,7 @@ public class LoginDataSource {
 
     public void getJson(String username, String password){
         JSONObjDownloader task = new JSONObjDownloader();
-        String url = "http://192.168.1.67/api/user/login/email/"+ username + "/pass/" + password;
+        String url = "http://ulideparty.ddns.net:8080/api/user/login/email/"+ username + "/pass/" + password;
 //        url = "/user/login/email/"+username+"/pass/" + password;
         url = "http://192.168.1.67:8080/api/user/login/email/leonardo@gmail.com/pass/123456";
         url = "http://ulideparty.ddns.net:8080/api/user/login/email/leonardo@gmail.com/pass/123456";

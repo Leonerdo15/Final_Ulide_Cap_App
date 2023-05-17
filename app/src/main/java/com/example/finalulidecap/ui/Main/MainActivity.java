@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.widget.Toast;
 
 import com.example.finalulidecap.R;
+import com.example.finalulidecap.data.LoginDataSource;
 import com.example.finalulidecap.databinding.ActivityMainBinding;
 import com.example.finalulidecap.downloaders.JSONObjDownloader;
 import com.example.finalulidecap.server.TinyWebServer;
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.e("IP", "" + ip);
 
-        url_update_ip = "http://ulideparty.ddns.net:8080/api/user/1/ip/" + ip;
+        url_update_ip = "http://ulideparty.ddns.net:8080/api/user/"+ String.valueOf( LoginDataSource.ID) +"/ip/" + ip;
 
         Log.e("URL", "" + url_update_ip);
 
