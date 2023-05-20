@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.finalulidecap.R;
 import com.example.finalulidecap.databinding.FragmentHomeBinding;
 import com.example.finalulidecap.databinding.FragmentSlideshowBinding;
+import com.example.finalulidecap.downloaders.PostData;
 import com.example.finalulidecap.server.TinyWebServer;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -53,10 +54,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 
 public class SlideshowFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnPolylineClickListener, GoogleMap.OnPolygonClickListener {
@@ -85,6 +89,8 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
     private boolean getLocation = true;
 
     TextView speedTextView;
+
+    float speedKmH = 0;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -259,11 +265,41 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
                             LocationListener locationListener = new LocationListener() {
                                 public void onLocationChanged(Location location) {
                                     float speed = location.getSpeed();
-                                    float speedKmH = speed * 3.6f;
+                                    speedKmH = speed * 3.6f;
                                     // make the speedKmH with two decimal places
                                     speedKmH = Math.round(speedKmH * 100.0f) / 100.0f;
                                     speedTextView.setText("Speed: " + speedKmH + "Km/h");
 //                                Toast.makeText(getActivity(), "Speed: "+ speedKmH + "Km/h", Toast.LENGTH_SHORT).show();
+                                    if (TinyWebServer.DATA_POSTED != null) {
+                                        try {
+                                            JSONObject arr = new JSONObject(TinyWebServer.DATA_POSTED);
+                                            arr.getInt("po_velocity");
+                                            Log.e("Velocity", arr.getInt("po_velocity") + "");
+
+
+                                            Map<String, String> postData = new HashMap<>();
+                                            postData.put("po_velocity", speedKmH + "");
+                                            postData.put("po_location", "point(" + location.getLatitude() + " " + location.getLongitude() + ")");
+//                                          TODO: Implementar rotas neste momento estamos sempre a por na rota 1
+                                            postData.put("po_ro_id", "1");
+                                            postData.put("po_ax", arr.getInt("ax") + "");
+                                            postData.put("po_ay", arr.getInt("ay") + "");
+                                            postData.put("po_az", arr.getInt("az") + "");
+                                            postData.put("po_gx", arr.getInt("gx") + "");
+                                            postData.put("po_gy", arr.getInt("gy") + "");
+                                            postData.put("po_gz", arr.getInt("gz") + "");
+                                            postData.put("po_tempInside", arr.getInt("temperature") + "");
+                                            postData.put("po_distancia", arr.getInt("distance") + "");
+
+                                            PostData task = new PostData(postData);
+                                            task.execute("http://ulideparty.ddns.net:8080/api/point").get();
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        } catch (ExecutionException | InterruptedException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
                                 }
                                 public void onStatusChanged(String provider, int status, Bundle extras) {}
                                 public void onProviderEnabled(String provider) {}
@@ -273,15 +309,6 @@ public class SlideshowFragment extends Fragment implements OnMapReadyCallback, G
                             locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 0, 20, locationListener);
 
                             Log.d("POSTED", "POSTED" + TinyWebServer.DATA_POSTED);
-                            if (TinyWebServer.DATA_POSTED != null) {
-                                try {
-                                    JSONObject arr = new JSONObject(TinyWebServer.DATA_POSTED);
-                                    arr.getInt("po_velocity");
-                                    Log.e("Velocity", arr.getInt("po_velocity") + "");
-                                } catch (JSONException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
 
 
                             // move camera to the last location in the route

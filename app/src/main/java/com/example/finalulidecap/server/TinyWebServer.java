@@ -160,7 +160,7 @@ public class TinyWebServer extends Thread {
     public static boolean isStart=true;
     public static String INDEX_FILE_NAME="index.html";
 
-    public static String DATA_POSTED = "{\"po_id\":1,\"po_location\":\"010100000000000000000028400000000000000040\",\"po_altitude\":111,\"po_velocity\":15,\"po_date\":\"2023-04-03T22:37:39.926Z\",\"po_TempOutside\":22,\"po_TempInside\":25.5,\"po_gx\":1,\"po_gy\":1,\"po_gz\":1,\"po_ax\":1,\"po_ay\":1,\"po_az\":1,\"po_DistUltraSound\":1025,\"po_ro_id\":1,\"po_lat\":12,\"po_long\":2}\n";
+    public static String DATA_POSTED = null;
     
 
     public TinyWebServer(final String ip, final int port) throws IOException {
@@ -218,6 +218,7 @@ public class TinyWebServer extends Thread {
                     //System.out.println("received data: \n" + recData);
                     //System.out.println("------------------------------");
                     String[] header = recData.split("\\r?\\n");
+                    Log.e("header", header + "");
 
                     String contentLen = "0";
                     String contentType = "text/html";
@@ -234,6 +235,7 @@ public class TinyWebServer extends Thread {
 
                     for (int h = 0; h < header.length; h++) {
                         String value = header[h].trim();
+                        Log.e("value", value + "");
 
                         //System.out.println(header[h]+" -> "+CONTENT_LENGTH_PATTERN.matcher(header[h]).find());
                         if (CONTENT_LENGTH_PATTERN.matcher(value).find()) {
